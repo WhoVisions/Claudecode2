@@ -1,0 +1,45 @@
+{
+  "name": "claudecode2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:33032/git/WhoVisions/Claudecode2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
+    "framer-motion": "^12.23.24",
+    "localforage": "^1.10.0",
+    "next": "^16.0.1",
+    "papaparse": "^5.5.3",
+    "pdf-parse": "^2.4.5",
+    "react": "^19.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
+    "react-pdf": "^10.2.0",
+    "recharts": "^3.4.1",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/papaparse": "^5.5.0",
+    "@types/pdf-parse": "^1.1.5",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17"
+  }
+}
