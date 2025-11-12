@@ -116,6 +116,78 @@ export interface Report {
   generatedAt: Date;
 }
 
+// Investment Portfolio Types
+export type HoldingType = 'stock' | 'etf' | 'mutual-fund' | 'crypto' | 'bond' | 'commodity' | 'real-estate' | 'other';
+
+export interface Holding {
+  id: string;
+  portfolioId: string;
+  symbol: string; // Ticker symbol or identifier
+  name: string;
+  type: HoldingType;
+
+  // Quantity and pricing
+  quantity: number;
+  averageCostBasis: number; // Average cost per unit
+  currentPrice: number; // Current market price per unit
+  currency: string;
+
+  // Calculated values
+  totalCost: number; // quantity * averageCostBasis
+  currentValue: number; // quantity * currentPrice
+  unrealizedGain: number; // currentValue - totalCost
+  unrealizedGainPercent: number;
+
+  // Additional data
+  notes?: string;
+  lastPriceUpdate?: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface HoldingTransaction {
+  id: string;
+  holdingId: string;
+  type: 'buy' | 'sell' | 'dividend' | 'split' | 'transfer-in' | 'transfer-out';
+  quantity: number;
+  pricePerUnit: number;
+  totalAmount: number;
+  fees?: number;
+  currency: string;
+  date: Date;
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface Portfolio {
+  id: string;
+  name: string;
+  description?: string;
+  accountId?: string; // Link to account in accounts store
+
+  // Aggregated values
+  totalValue: number;
+  totalCost: number;
+  totalGain: number;
+  totalGainPercent: number;
+
+  // Cash position
+  cashBalance: number;
+  currency: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PortfolioPerformance {
+  portfolioId: string;
+  date: Date;
+  totalValue: number;
+  totalGain: number;
+  totalGainPercent: number;
+}
+
 // Dashboard statistics
 export interface DashboardStats {
   totalIncome: number;
@@ -132,4 +204,9 @@ export interface DashboardStats {
     percentage: number;
   }[];
   recentTransactions: Transaction[];
+
+  // Investment stats
+  totalPortfolioValue?: number;
+  totalPortfolioGain?: number;
+  totalPortfolioGainPercent?: number;
 }

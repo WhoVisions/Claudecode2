@@ -5,7 +5,7 @@ import { useWindowManager } from '@/app/context/WindowManager';
 import Window from './Window';
 import Taskbar from './Taskbar';
 import FileIcon from './FileIcon';
-import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase } from 'react-icons/fa';
 
 // App Components
 import FileExplorer from '../apps/FileExplorer';
@@ -18,6 +18,7 @@ import Dashboard from '../apps/Dashboard';
 import Transactions from '../apps/Transactions';
 import Accounts from '../apps/Accounts';
 import Budgets from '../apps/Budgets';
+import PortfolioApp from '../apps/PortfolioApp';
 
 const Desktop: React.FC = () => {
   const { windows, openWindow } = useWindowManager();
@@ -52,6 +53,12 @@ const Desktop: React.FC = () => {
       icon: FaPiggyBank,
       appType: 'budgets',
       title: 'Budgets',
+    },
+    {
+      name: 'Portfolio',
+      icon: FaBriefcase,
+      appType: 'portfolio',
+      title: 'Investment Portfolio',
     },
     {
       name: 'Tax Agent',
@@ -89,6 +96,8 @@ const Desktop: React.FC = () => {
         return <Accounts />;
       case 'budgets':
         return <Budgets />;
+      case 'portfolio':
+        return <PortfolioApp />;
       case 'tax-agent':
         return <TaxAgent />;
       case 'settings':

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useWindowManager } from '@/app/context/WindowManager';
-import { FaApple, FaFolder, FaFileAlt, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank } from 'react-icons/fa';
+import { FaApple, FaFolder, FaFileAlt, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase } from 'react-icons/fa';
 import StartMenu from './StartMenu';
 
 const Taskbar: React.FC = () => {
@@ -28,6 +28,8 @@ const Taskbar: React.FC = () => {
         return FaWallet;
       case 'budgets':
         return FaPiggyBank;
+      case 'portfolio':
+        return FaBriefcase;
       case 'csv-viewer':
       case 'pdf-viewer':
       case 'text-viewer':
