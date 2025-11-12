@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { db } from '@/app/lib/db';
+import { db, ClientOrganizerAnswer, CapitalGain } from '@/app/lib/db';
 import { FaShieldAlt, FaCheckCircle, FaExclamationTriangle, FaTimesCircle, FaPlay } from 'react-icons/fa';
 
 interface AuditFlag {
@@ -12,6 +12,7 @@ interface AuditFlag {
 }
 
 interface AuditReport {
+  humanContext: AuditFlag;
   incomeMismatch: AuditFlag;
   roundNumbers: AuditFlag;
   deductionPercentage: AuditFlag;
@@ -26,6 +27,7 @@ const LocalAuditCenter: React.FC = () => {
     setLoading(true);
     try {
       const auditReport: AuditReport = {
+        humanContext: await checkHumanContext(),
         incomeMismatch: await checkIncomeMismatch(),
         roundNumbers: await checkRoundNumbers(),
         deductionPercentage: await checkDeductionPercentage(),
@@ -37,6 +39,210 @@ const LocalAuditCenter: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const checkHumanContext = async (): Promise<AuditFlag> => {
+    try {
+      // Get all organizer answers where user said "Yes"
+      const organizerKeys = await db.clientOrganizer.keys();
+      const yesAnswers: ClientOrganizerAnswer[] = [];
+
+      for (const key of organizerKeys) {
+        const answer = await db.clientOrganizer.getItem<ClientOrganizerAnswer>(key);
+        if (answer && answer.answer === true) {
+          yesAnswers.push(answer);
+        }
+      }
+
+      if (yesAnswers.length === 0) {
+        return {
+          type: 'yellow',
+          title: 'Human Context Scan',
+          message: 'No life events recorded in Client Organizer. Consider filling out the organizer questionnaire.',
+        };
+      }
+
+      const redFlags: string[] = [];
+      const yellowFlags: string[] = [];
+
+      // Check each "yes" answer against tax data
+      for (const answer of yesAnswers) {
+        const questionId = answer.id;
+
+        // Child Born - Check for new dependents or child tax credits
+        if (questionId === 'child-born') {
+          // In a real implementation, we'd check for dependents on tax return
+          // For now, we'll check if user has any family-related deductions
+          const hasChildCredit = await checkForChildTaxCredit();
+          if (!hasChildCredit) {
+            redFlags.push(
+              `🔴 You checked 'Had or adopted a child' in your Client Organizer, but no child tax credit or new dependent was found in your tax calculation. Did you add the new dependent?`
+            );
+          }
+        }
+
+        // Home Sold - Check for capital gains from real estate
+        if (questionId === 'home-sold') {
+          const capitalGainsKeys = await db.capitalGains.keys();
+          let foundHomeSale = false;
+
+          for (const key of capitalGainsKeys) {
+            const gain = await db.capitalGains.getItem<CapitalGain>(key);
+            // Home sales typically have high proceeds (>$50k)
+            if (gain && gain.proceeds > 50000) {
+              foundHomeSale = true;
+              break;
+            }
+          }
+
+          if (!foundHomeSale) {
+            redFlags.push(
+              `🔴 You checked 'Sold your primary residence' in your Client Organizer, but no large capital gain transaction was found in your Portfolio data. Did you report the home sale on Schedule D?`
+            );
+          }
+        }
+
+        // Stocks/Crypto Sold - Check for capital gains
+        if (questionId === 'stocks-sold' || questionId === 'crypto-transactions') {
+          const capitalGainsKeys = await db.capitalGains.keys();
+          if (capitalGainsKeys.length === 0) {
+            const asset = questionId === 'crypto-transactions' ? 'cryptocurrency' : 'stocks/bonds';
+            redFlags.push(
+              `🔴 You checked that you sold ${asset} in your Client Organizer, but no capital gains transactions were found in your Portfolio tracker. All sales must be reported.`
+            );
+          }
+        }
+
+        // Business Started - Check for Schedule C income
+        if (questionId === 'business-started' || questionId === 'contractor-income') {
+          const hasBusinessIncome = await checkForBusinessIncome();
+          if (!hasBusinessIncome) {
+            yellowFlags.push(
+              `⚠️ You indicated self-employment or business activity in your Client Organizer, but no business income (Schedule C) was found. Did you report this income?`
+            );
+          }
+        }
+
+        // Home Office - Check for home office deductions
+        if (questionId === 'home-office') {
+          const hasHomeOfficeDeduction = await checkForHomeOfficeDeduction();
+          if (!hasHomeOfficeDeduction) {
+            yellowFlags.push(
+              `⚠️ You checked 'Used home for business' but no home office deduction was found in your transactions. You may be missing a valuable deduction.`
+            );
+          }
+        }
+
+        // Charitable Donations - Check for itemized deductions
+        if (questionId === 'charitable-donations') {
+          const hasCharitableDeductions = await checkForCharitableDeductions();
+          if (!hasCharitableDeductions) {
+            yellowFlags.push(
+              `⚠️ You indicated charitable donations over $250 but no charitable donation transactions were found. Remember: donations require written acknowledgment.`
+            );
+          }
+        }
+
+        // High Medical Expenses - Check for medical deductions
+        if (questionId === 'medical-expenses-high') {
+          const hasMedicalDeductions = await checkForMedicalDeductions();
+          if (!hasMedicalDeductions) {
+            yellowFlags.push(
+              `⚠️ You indicated high medical expenses (>$5,000) but no medical expense transactions were found. These may be deductible if they exceed 7.5% of AGI.`
+            );
+          }
+        }
+
+        // Marriage/Divorce - Check filing status
+        if (questionId === 'married' || questionId === 'divorced') {
+          const event = questionId === 'married' ? 'married' : 'divorced/separated';
+          yellowFlags.push(
+            `⚠️ You indicated you got ${event} this year. Verify your filing status is correct (Single/Married Filing Jointly/Married Filing Separately).`
+          );
+        }
+      }
+
+      // Return results
+      if (redFlags.length === 0 && yellowFlags.length === 0) {
+        return {
+          type: 'pass',
+          title: 'Human Context Scan',
+          message: `✅ Cross-referenced ${yesAnswers.length} life event(s) from your Client Organizer against your tax data. No mismatches detected.`,
+        };
+      } else if (redFlags.length > 0) {
+        return {
+          type: 'red',
+          title: 'Human Context Scan',
+          message: `⚠️ CRITICAL: Found ${redFlags.length} mismatch(es) between your Client Organizer and tax calculation. These are potential errors or omissions.`,
+          details: [...redFlags, ...yellowFlags],
+        };
+      } else {
+        return {
+          type: 'yellow',
+          title: 'Human Context Scan',
+          message: `Found ${yellowFlags.length} potential issue(s) between your Client Organizer and tax data. Review for accuracy.`,
+          details: yellowFlags,
+        };
+      }
+    } catch (error) {
+      return {
+        type: 'yellow',
+        title: 'Human Context Scan',
+        message: 'Unable to complete human context scan. Make sure you have completed the Client Organizer questionnaire.',
+      };
+    }
+  };
+
+  // Helper functions for human context checks
+  const checkForChildTaxCredit = async (): Promise<boolean> => {
+    // Check if there are any family-related transactions or dependents
+    // For now, this is a placeholder - would need actual dependent data
+    return false; // Conservative: assume not found
+  };
+
+  const checkForBusinessIncome = async (): Promise<boolean> => {
+    const transactionKeys = await db.transactions.keys();
+    for (const key of transactionKeys) {
+      const tx = await db.transactions.getItem<any>(key);
+      if (tx && tx.category === 'Business Expense') {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const checkForHomeOfficeDeduction = async (): Promise<boolean> => {
+    const transactionKeys = await db.transactions.keys();
+    for (const key of transactionKeys) {
+      const tx = await db.transactions.getItem<any>(key);
+      if (tx && (tx.description?.toLowerCase().includes('home office') || tx.category === 'Home Office')) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const checkForCharitableDeductions = async (): Promise<boolean> => {
+    const transactionKeys = await db.transactions.keys();
+    for (const key of transactionKeys) {
+      const tx = await db.transactions.getItem<any>(key);
+      if (tx && tx.category === 'Charitable Donations' && Math.abs(tx.amount) >= 250) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const checkForMedicalDeductions = async (): Promise<boolean> => {
+    const transactionKeys = await db.transactions.keys();
+    let totalMedical = 0;
+    for (const key of transactionKeys) {
+      const tx = await db.transactions.getItem<any>(key);
+      if (tx && tx.category === 'Medical Expenses') {
+        totalMedical += Math.abs(tx.amount);
+      }
+    }
+    return totalMedical >= 5000;
   };
 
   const checkIncomeMismatch = async (): Promise<AuditFlag> => {
@@ -321,6 +527,9 @@ const LocalAuditCenter: React.FC = () => {
                 Scanned your local data for IRS red flags. Review each section below.
               </p>
             </div>
+
+            {/* Human Context Scan */}
+            <AuditFlagCard flag={report.humanContext} />
 
             {/* Income Mismatch Scan */}
             <AuditFlagCard flag={report.incomeMismatch} />

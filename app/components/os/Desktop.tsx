@@ -5,7 +5,7 @@ import { useWindowManager } from '@/app/context/WindowManager';
 import Window from './Window';
 import Taskbar from './Taskbar';
 import FileIcon from './FileIcon';
-import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt, FaGraduationCap, FaClipboardList } from 'react-icons/fa';
 
 // App Components
 import FileExplorer from '../apps/FileExplorer';
@@ -23,6 +23,7 @@ import TaxIntakeApp from '../apps/TaxIntakeApp';
 import TaxCalculatorApp from '../apps/TaxCalculatorApp';
 import LocalAuditCenter from '../apps/LocalAuditCenter';
 import TaxResearchApp from '../apps/TaxResearchApp';
+import ClientOrganizerApp from '../apps/ClientOrganizerApp';
 
 const Desktop: React.FC = () => {
   const { windows, openWindow } = useWindowManager();
@@ -75,6 +76,12 @@ const Desktop: React.FC = () => {
       icon: FaClipboardCheck,
       appType: 'tax-intake',
       title: 'Tax Document Intake',
+    },
+    {
+      name: 'Client Organizer',
+      icon: FaClipboardList,
+      appType: 'client-organizer',
+      title: 'Client Tax Organizer',
     },
     {
       name: 'Tax Calculator',
@@ -130,6 +137,8 @@ const Desktop: React.FC = () => {
         return <TaxAgent />;
       case 'tax-intake':
         return <TaxIntakeApp />;
+      case 'client-organizer':
+        return <ClientOrganizerApp />;
       case 'tax-calculator':
         return <TaxCalculatorApp />;
       case 'audit-center':

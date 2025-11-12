@@ -150,6 +150,17 @@ export interface CapitalGain {
   createdAt: string;
 }
 
+// Client organizer interface for db.clientOrganizer store
+export interface ClientOrganizerAnswer {
+  id: string;
+  taxYear: number;
+  question: string;
+  answer: boolean; // true = yes, false = no
+  category: 'family' | 'housing' | 'employment' | 'investment' | 'business' | 'education' | 'health' | 'other';
+  notes?: string;
+  updatedAt: string;
+}
+
 // Initialize all stores
 export const db = {
   transactions: localforage.createInstance({
@@ -199,6 +210,10 @@ export const db = {
   capitalGains: localforage.createInstance({
     name: 'fin-os-db',
     storeName: 'capitalGains',
+  }),
+  clientOrganizer: localforage.createInstance({
+    name: 'fin-os-db',
+    storeName: 'clientOrganizer',
   }),
 };
 
