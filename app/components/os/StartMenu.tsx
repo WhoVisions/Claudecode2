@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useWindowManager } from '@/app/context/WindowManager';
-import { FaFolder, FaChartBar, FaCog, FaTimes } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTimes, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank } from 'react-icons/fa';
 
 interface StartMenuProps {
   onClose: () => void;
@@ -12,6 +12,30 @@ const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
   const { openWindow } = useWindowManager();
 
   const apps = [
+    {
+      id: 'dashboard',
+      title: 'Dashboard',
+      icon: FaTachometerAlt,
+      appType: 'dashboard',
+    },
+    {
+      id: 'transactions',
+      title: 'Transactions',
+      icon: FaDollarSign,
+      appType: 'transactions',
+    },
+    {
+      id: 'accounts',
+      title: 'Accounts',
+      icon: FaWallet,
+      appType: 'accounts',
+    },
+    {
+      id: 'budgets',
+      title: 'Budgets',
+      icon: FaPiggyBank,
+      appType: 'budgets',
+    },
     {
       id: 'file-explorer',
       title: 'File Explorer',

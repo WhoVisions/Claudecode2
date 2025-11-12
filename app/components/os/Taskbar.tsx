@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useWindowManager } from '@/app/context/WindowManager';
-import { FaApple, FaFolder, FaFileAlt, FaChartBar, FaCog } from 'react-icons/fa';
+import { FaApple, FaFolder, FaFileAlt, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank } from 'react-icons/fa';
 import StartMenu from './StartMenu';
 
 const Taskbar: React.FC = () => {
@@ -18,8 +18,16 @@ const Taskbar: React.FC = () => {
 
   const getWindowIcon = (appType: string) => {
     switch (appType) {
+      case 'dashboard':
+        return FaTachometerAlt;
       case 'file-explorer':
         return FaFolder;
+      case 'transactions':
+        return FaDollarSign;
+      case 'accounts':
+        return FaWallet;
+      case 'budgets':
+        return FaPiggyBank;
       case 'csv-viewer':
       case 'pdf-viewer':
       case 'text-viewer':

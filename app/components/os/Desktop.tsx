@@ -5,7 +5,7 @@ import { useWindowManager } from '@/app/context/WindowManager';
 import Window from './Window';
 import Taskbar from './Taskbar';
 import FileIcon from './FileIcon';
-import { FaFolder, FaChartBar, FaCog } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank } from 'react-icons/fa';
 
 // App Components
 import FileExplorer from '../apps/FileExplorer';
@@ -14,16 +14,44 @@ import Settings from '../apps/Settings';
 import CSVViewer from '../apps/CSVViewer';
 import PDFViewer from '../apps/PDFViewer';
 import TextViewer from '../apps/TextViewer';
+import Dashboard from '../apps/Dashboard';
+import Transactions from '../apps/Transactions';
+import Accounts from '../apps/Accounts';
+import Budgets from '../apps/Budgets';
 
 const Desktop: React.FC = () => {
   const { windows, openWindow } = useWindowManager();
 
   const desktopIcons = [
     {
+      name: 'Dashboard',
+      icon: FaTachometerAlt,
+      appType: 'dashboard',
+      title: 'Dashboard',
+    },
+    {
       name: 'My Finances',
       icon: FaFolder,
       appType: 'file-explorer',
       title: 'File Explorer',
+    },
+    {
+      name: 'Transactions',
+      icon: FaDollarSign,
+      appType: 'transactions',
+      title: 'Transactions',
+    },
+    {
+      name: 'Accounts',
+      icon: FaWallet,
+      appType: 'accounts',
+      title: 'Accounts',
+    },
+    {
+      name: 'Budgets',
+      icon: FaPiggyBank,
+      appType: 'budgets',
+      title: 'Budgets',
     },
     {
       name: 'Tax Agent',
@@ -51,8 +79,16 @@ const Desktop: React.FC = () => {
 
   const renderApp = (window: any) => {
     switch (window.appType) {
+      case 'dashboard':
+        return <Dashboard />;
       case 'file-explorer':
         return <FileExplorer />;
+      case 'transactions':
+        return <Transactions />;
+      case 'accounts':
+        return <Accounts />;
+      case 'budgets':
+        return <Budgets />;
       case 'tax-agent':
         return <TaxAgent />;
       case 'settings':
