@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useWindowManager } from '@/app/context/WindowManager';
-import { FaApple, FaFolder, FaFileAlt, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt } from 'react-icons/fa';
+import { FaApple, FaFolder, FaFileAlt, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
 import StartMenu from './StartMenu';
 
 const Taskbar: React.FC = () => {
@@ -42,6 +42,8 @@ const Taskbar: React.FC = () => {
         return FaCalculator;
       case 'audit-center':
         return FaShieldAlt;
+      case 'tax-research':
+        return FaGraduationCap;
       case 'settings':
         return FaCog;
       default:

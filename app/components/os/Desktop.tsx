@@ -5,7 +5,7 @@ import { useWindowManager } from '@/app/context/WindowManager';
 import Window from './Window';
 import Taskbar from './Taskbar';
 import FileIcon from './FileIcon';
-import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
 
 // App Components
 import FileExplorer from '../apps/FileExplorer';
@@ -22,6 +22,7 @@ import PortfolioApp from '../apps/PortfolioApp';
 import TaxIntakeApp from '../apps/TaxIntakeApp';
 import TaxCalculatorApp from '../apps/TaxCalculatorApp';
 import LocalAuditCenter from '../apps/LocalAuditCenter';
+import TaxResearchApp from '../apps/TaxResearchApp';
 
 const Desktop: React.FC = () => {
   const { windows, openWindow } = useWindowManager();
@@ -88,6 +89,12 @@ const Desktop: React.FC = () => {
       title: 'Local Audit Center',
     },
     {
+      name: 'Tax Research',
+      icon: FaGraduationCap,
+      appType: 'tax-research',
+      title: 'Tax Research Assistant',
+    },
+    {
       name: 'Settings',
       icon: FaCog,
       appType: 'settings',
@@ -127,6 +134,8 @@ const Desktop: React.FC = () => {
         return <TaxCalculatorApp />;
       case 'audit-center':
         return <LocalAuditCenter />;
+      case 'tax-research':
+        return <TaxResearchApp />;
       case 'settings':
         return <Settings />;
       case 'csv-viewer':
