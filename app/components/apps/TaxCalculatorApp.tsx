@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { db } from '@/app/lib/db';
-import { FaCalculator, FaFileInvoiceDollar, FaMoneyBillWave } from 'react-icons/fa';
+import { db, CapitalGain } from '@/app/lib/db';
+import { FaCalculator, FaFileInvoiceDollar, FaMoneyBillWave, FaBriefcase } from 'react-icons/fa';
 
 // 2024 Federal Tax Brackets (Single Filer)
 const TAX_BRACKETS_SINGLE = [
@@ -85,6 +85,41 @@ const TaxCalculatorApp: React.FC = () => {
             }
           }
         }
+      }
+
+      // Read capital gains from portfolios
+      const capitalGainsKeys = await db.capitalGains.keys();
+      let shortTermGains = 0;
+      let longTermGains = 0;
+
+      for (const key of capitalGainsKeys) {
+        const gain = await db.capitalGains.getItem<CapitalGain>(key);
+        if (gain) {
+          if (gain.gainType === 'short-term') {
+            shortTermGains += gain.realizedGain;
+          } else {
+            longTermGains += gain.realizedGain;
+          }
+        }
+      }
+
+      // Add short-term capital gains to ordinary income (taxed at regular rates)
+      if (shortTermGains !== 0) {
+        totalIncome += shortTermGains;
+        sources.push({
+          source: `Short-Term Capital Gains`,
+          amount: shortTermGains,
+        });
+      }
+
+      // Add long-term capital gains to ordinary income (will be taxed at preferential rates)
+      // Note: This is simplified - real calculation would apply special capital gains rates
+      if (longTermGains !== 0) {
+        totalIncome += longTermGains;
+        sources.push({
+          source: `Long-Term Capital Gains`,
+          amount: longTermGains,
+        });
       }
 
       setIncomeBreakdown(sources);

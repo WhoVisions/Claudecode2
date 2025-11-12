@@ -134,6 +134,22 @@ export interface TaxKnowledgeChunk {
   createdAt: string;
 }
 
+// Capital gains interface for db.capitalGains store
+export interface CapitalGain {
+  id: string;
+  portfolioId: string;
+  symbol: string;
+  saleDate: string;
+  sharesSold: number;
+  proceeds: number; // Total sale amount
+  costBasis: number; // Total cost basis of shares sold
+  realizedGain: number; // proceeds - costBasis
+  gainType: 'short-term' | 'long-term'; // Based on 1-year holding period
+  purchaseDates: string[]; // Array of original purchase dates for the shares sold
+  notes?: string;
+  createdAt: string;
+}
+
 // Initialize all stores
 export const db = {
   transactions: localforage.createInstance({
@@ -180,6 +196,10 @@ export const db = {
     name: 'fin-os-db',
     storeName: 'taxKnowledge',
   }),
+  capitalGains: localforage.createInstance({
+    name: 'fin-os-db',
+    storeName: 'capitalGains',
+  }),
 };
 
 // Helper functions for portfolio calculations
@@ -219,6 +239,76 @@ export const calculatePortfolioMetrics = async (portfolioId: string): Promise<Pa
     totalCost,
     totalGain,
     totalGainPercent,
+  };
+};
+
+// FIFO Cost Basis Calculation for selling shares
+export interface FIFOResult {
+  costBasis: number;
+  gainType: 'short-term' | 'long-term';
+  purchaseDates: string[];
+}
+
+export const calculateFIFOCostBasis = async (
+  portfolioId: string,
+  symbol: string,
+  sharesSold: number,
+  saleDate: string
+): Promise<FIFOResult> => {
+  // Get all holding transactions for this symbol
+  const transactionKeys = await db.holdingTransactions.keys();
+  const buyTransactions: HoldingTransaction[] = [];
+
+  for (const key of transactionKeys) {
+    const tx = await db.holdingTransactions.getItem<HoldingTransaction>(key);
+    if (tx && tx.type === 'buy') {
+      // Find the holding for this transaction
+      const holdingKeys = await db.holdings.keys();
+      for (const hKey of holdingKeys) {
+        const holding = await db.holdings.getItem<Holding>(hKey);
+        if (holding && holding.id === tx.holdingId && holding.portfolioId === portfolioId && holding.symbol === symbol) {
+          buyTransactions.push(tx);
+          break;
+        }
+      }
+    }
+  }
+
+  // Sort buy transactions by date (oldest first) - FIFO
+  buyTransactions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  let remainingShares = sharesSold;
+  let totalCostBasis = 0;
+  const purchaseDates: string[] = [];
+  let isShortTerm = false;
+
+  const saleDateObj = new Date(saleDate);
+  const oneYearAgo = new Date(saleDateObj);
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+  // Process buy transactions in FIFO order
+  for (const buyTx of buyTransactions) {
+    if (remainingShares <= 0) break;
+
+    const sharesToTake = Math.min(remainingShares, buyTx.quantity);
+    const costBasisForTheseShares = sharesToTake * buyTx.pricePerUnit;
+
+    totalCostBasis += costBasisForTheseShares;
+    purchaseDates.push(buyTx.date);
+
+    // Check if any shares are short-term (held <= 1 year)
+    const purchaseDate = new Date(buyTx.date);
+    if (purchaseDate > oneYearAgo) {
+      isShortTerm = true;
+    }
+
+    remainingShares -= sharesToTake;
+  }
+
+  return {
+    costBasis: totalCostBasis,
+    gainType: isShortTerm ? 'short-term' : 'long-term',
+    purchaseDates,
   };
 };
 

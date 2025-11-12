@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db, Portfolio, Holding, HoldingTransaction, calculateHoldingMetrics, calculatePortfolioMetrics } from '@/app/lib/db';
 import { FaPlus, FaEdit, FaTrash, FaChartPie, FaArrowUp, FaArrowDown, FaExchangeAlt, FaBriefcase } from 'react-icons/fa';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { TransactionModal } from './TransactionModal';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
 
@@ -15,6 +16,10 @@ const PortfolioApp: React.FC = () => {
   const [showHoldingForm, setShowHoldingForm] = useState(false);
   const [editingPortfolioId, setEditingPortfolioId] = useState<string | null>(null);
   const [editingHoldingId, setEditingHoldingId] = useState<string | null>(null);
+  const [transactionModal, setTransactionModal] = useState<{
+    holding: Holding;
+    type: 'buy' | 'sell';
+  } | null>(null);
 
   const [portfolioForm, setPortfolioForm] = useState({
     name: '',
@@ -603,6 +608,20 @@ const PortfolioApp: React.FC = () => {
 
                             <div className="flex flex-col gap-2 ml-4">
                               <button
+                                onClick={() => setTransactionModal({ holding, type: 'buy' })}
+                                className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs transition-colors"
+                                title="Buy more shares"
+                              >
+                                <FaArrowUp /> Buy
+                              </button>
+                              <button
+                                onClick={() => setTransactionModal({ holding, type: 'sell' })}
+                                className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs transition-colors"
+                                title="Sell shares"
+                              >
+                                <FaArrowDown /> Sell
+                              </button>
+                              <button
                                 onClick={() => handleEditHolding(holding)}
                                 className="text-gray-400 hover:text-blue-400 transition-colors p-2"
                                 title="Edit holding"
@@ -689,6 +708,22 @@ const PortfolioApp: React.FC = () => {
             </>
           )}
         </div>
+      )}
+
+      {/* Transaction Modal */}
+      {transactionModal && (
+        <TransactionModal
+          holding={transactionModal.holding}
+          transactionType={transactionModal.type}
+          onClose={() => setTransactionModal(null)}
+          onSuccess={() => {
+            setTransactionModal(null);
+            if (selectedPortfolioId) {
+              loadHoldings(selectedPortfolioId);
+              loadPortfolios();
+            }
+          }}
+        />
       )}
     </div>
   );

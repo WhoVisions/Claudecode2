@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import StorageManager from '@/app/lib/storage';
 import { Account, AccountType } from '@/app/types/financial';
-import { FaPlus, FaEdit, FaTrash, FaWallet, FaUniversity, FaMoneyBillWave } from 'react-icons/fa';
+import { db, Portfolio } from '@/app/lib/db';
+import { FaPlus, FaEdit, FaTrash, FaWallet, FaUniversity, FaMoneyBillWave, FaBriefcase } from 'react-icons/fa';
 
 const Accounts: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [portfolioValue, setPortfolioValue] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -20,10 +22,29 @@ const Accounts: React.FC = () => {
 
   useEffect(() => {
     loadAccounts();
+    loadPortfolioValue();
   }, []);
 
   const loadAccounts = () => {
     setAccounts(StorageManager.getAccounts());
+  };
+
+  const loadPortfolioValue = async () => {
+    try {
+      const portfolioKeys = await db.portfolios.keys();
+      let totalValue = 0;
+
+      for (const key of portfolioKeys) {
+        const portfolio = await db.portfolios.getItem<Portfolio>(key);
+        if (portfolio) {
+          totalValue += portfolio.totalValue + portfolio.cashBalance;
+        }
+      }
+
+      setPortfolioValue(totalValue);
+    } catch (error) {
+      console.error('Error loading portfolio value:', error);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -111,20 +132,45 @@ const Accounts: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-gray-900">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-200">Accounts</h2>
-          <p className="text-xs text-gray-400">
-            Total Balance: {formatCurrency(getTotalBalance())}
-          </p>
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-gray-200">Accounts & Net Worth</h2>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+          >
+            <FaPlus />
+            {editingId ? 'Cancel Edit' : 'New Account'}
+          </button>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
-        >
-          <FaPlus />
-          {editingId ? 'Cancel Edit' : 'New Account'}
-        </button>
+
+        {/* Net Worth Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="bg-gray-900 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <FaWallet className="text-blue-400" />
+              <div className="text-xs text-gray-400">Accounts Balance</div>
+            </div>
+            <div className="text-lg font-bold text-gray-200">
+              {formatCurrency(getTotalBalance())}
+            </div>
+          </div>
+          <div className="bg-gray-900 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <FaBriefcase className="text-purple-400" />
+              <div className="text-xs text-gray-400">Portfolio Value</div>
+            </div>
+            <div className="text-lg font-bold text-purple-400">
+              {formatCurrency(portfolioValue)}
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-blue-900 to-purple-900 rounded-lg p-3 border border-blue-700">
+            <div className="text-xs text-gray-300 mb-1">Total Net Worth</div>
+            <div className="text-xl font-bold text-white">
+              {formatCurrency(getTotalBalance() + portfolioValue)}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Form */}
