@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useWindowManager } from '@/app/context/WindowManager';
-import { FaFolder, FaChartBar, FaCog, FaTimes, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTimes, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt } from 'react-icons/fa';
 
 interface StartMenuProps {
   onClose: () => void;
@@ -50,9 +50,27 @@ const StartMenu: React.FC<StartMenuProps> = ({ onClose }) => {
     },
     {
       id: 'tax-agent',
-      title: 'Tax Agent',
+      title: 'Document Agent',
       icon: FaChartBar,
       appType: 'tax-agent',
+    },
+    {
+      id: 'tax-intake',
+      title: 'Tax Intake',
+      icon: FaClipboardCheck,
+      appType: 'tax-intake',
+    },
+    {
+      id: 'tax-calculator',
+      title: 'Tax Calculator',
+      icon: FaCalculator,
+      appType: 'tax-calculator',
+    },
+    {
+      id: 'audit-center',
+      title: 'Audit Center',
+      icon: FaShieldAlt,
+      appType: 'audit-center',
     },
     {
       id: 'settings',

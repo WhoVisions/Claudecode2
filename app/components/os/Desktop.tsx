@@ -5,7 +5,7 @@ import { useWindowManager } from '@/app/context/WindowManager';
 import Window from './Window';
 import Taskbar from './Taskbar';
 import FileIcon from './FileIcon';
-import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase } from 'react-icons/fa';
+import { FaFolder, FaChartBar, FaCog, FaTachometerAlt, FaDollarSign, FaWallet, FaPiggyBank, FaBriefcase, FaCalculator, FaClipboardCheck, FaShieldAlt } from 'react-icons/fa';
 
 // App Components
 import FileExplorer from '../apps/FileExplorer';
@@ -19,6 +19,9 @@ import Transactions from '../apps/Transactions';
 import Accounts from '../apps/Accounts';
 import Budgets from '../apps/Budgets';
 import PortfolioApp from '../apps/PortfolioApp';
+import TaxIntakeApp from '../apps/TaxIntakeApp';
+import TaxCalculatorApp from '../apps/TaxCalculatorApp';
+import LocalAuditCenter from '../apps/LocalAuditCenter';
 
 const Desktop: React.FC = () => {
   const { windows, openWindow } = useWindowManager();
@@ -64,7 +67,25 @@ const Desktop: React.FC = () => {
       name: 'Tax Agent',
       icon: FaChartBar,
       appType: 'tax-agent',
-      title: 'Tax Agent',
+      title: 'Document Agent',
+    },
+    {
+      name: 'Tax Intake',
+      icon: FaClipboardCheck,
+      appType: 'tax-intake',
+      title: 'Tax Document Intake',
+    },
+    {
+      name: 'Tax Calculator',
+      icon: FaCalculator,
+      appType: 'tax-calculator',
+      title: 'Tax Calculator',
+    },
+    {
+      name: 'Audit Center',
+      icon: FaShieldAlt,
+      appType: 'audit-center',
+      title: 'Local Audit Center',
     },
     {
       name: 'Settings',
@@ -100,6 +121,12 @@ const Desktop: React.FC = () => {
         return <PortfolioApp />;
       case 'tax-agent':
         return <TaxAgent />;
+      case 'tax-intake':
+        return <TaxIntakeApp />;
+      case 'tax-calculator':
+        return <TaxCalculatorApp />;
+      case 'audit-center':
+        return <LocalAuditCenter />;
       case 'settings':
         return <Settings />;
       case 'csv-viewer':
