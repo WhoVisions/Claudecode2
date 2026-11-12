@@ -181,3 +181,16 @@ Built with modern web technologies and inspired by desktop operating systems.
 ---
 
 **Note**: This application is designed for local use only. Always backup your financial data regularly.
+
+<!-- nougen:fleet-role:begin (generated from NouGenRelay fleet/manifest.json; edit the manifest, not this block) -->
+## Fleet role
+
+| | |
+|---|---|
+| Role | Claudecode2 (TypeScript) |
+| Kind | genesis_domain |
+| Status | canonical |
+| Canonical for | claudecode2 |
+| Visibility | public |
+
+<!-- nougen:fleet-role:end -->
